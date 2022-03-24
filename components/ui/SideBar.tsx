@@ -28,9 +28,11 @@ export const SideBar = () => {
         <List>
           {menuItems.map((text, index) => (
             <ListItem button key={text}>
-              <ListItemButton>
-                {index % 2 ? <InboxOutlinedIcon /> : <EmailOutlinedIcon />}
-              </ListItemButton>
+              <Box>
+                <ListItemButton>
+                  {index % 2 ? <InboxOutlinedIcon /> : <EmailOutlinedIcon />}
+                </ListItemButton>
+              </Box>
               <ListItemText primary={text} />
             </ListItem>
           ))}
@@ -39,9 +41,11 @@ export const SideBar = () => {
         <List>
           {menuItems.map((text, index) => (
             <ListItem button key={text}>
-              <ListItemButton>
-                {index % 2 ? <InboxOutlinedIcon /> : <EmailOutlinedIcon />}
-              </ListItemButton>
+              <Box>
+                <ListItemButton>
+                  {index % 2 ? <InboxOutlinedIcon /> : <EmailOutlinedIcon />}
+                </ListItemButton>
+              </Box>
               <ListItemText primary={text} />
             </ListItem>
           ))}
