@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import mongoose from 'mongoose';
-import { db } from '../../../database';
-import { Entry, IEntry } from '../../../models';
+import { db } from '../../../../database';
+import { Entry, IEntry } from '../../../../models';
 
 type Data = { message: string } | IEntry;
 
@@ -9,37 +8,40 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { id } = req.query;
+  // const { id } = req.query;
 
-  if (!mongoose.isValidObjectId(id)) {
-    return res.status(400).json({ message: 'El id no es valido' + id });
-  }
+  // if ( !mongoose.isValidObjectId( id ) ) {
+  //     return res.status(400).json({ message: 'El id no es válido ' + id })
+  // }
+
   switch (req.method) {
     case 'PUT':
       return updateEntry(req, res);
+
     case 'GET':
       return getEntry(req, res);
+
     default:
-      return res.status(400).json({ message: 'El método no existe' });
+      return res
+        .status(400)
+        .json({ message: 'Método no existe ' + req.method });
   }
 }
 
-const getEntry = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
+const getEntry = async (req: NextApiRequest, res: NextApiResponse) => {
   const { id } = req.query;
 
   await db.connect();
-
   const entryInDB = await Entry.findById(id);
-  
   await db.disconnect();
-  
+
   if (!entryInDB) {
     return res
       .status(400)
-      .json({ message: 'No existe una entrada con ese ID:' + id });
+      .json({ message: 'No hay entrada con ese ID: ' + id });
   }
-  
-  return res.status(200).json(entryInDB!);
+
+  return res.status(200).json(entryInDB);
 };
 
 const updateEntry = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
@@ -53,7 +55,7 @@ const updateEntry = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     await db.disconnect();
     return res
       .status(400)
-      .json({ message: 'No existe una entrada con ese ID:' + id });
+      .json({ message: 'No hay entrada con ese ID: ' + id });
   }
 
   const {
@@ -67,14 +69,13 @@ const updateEntry = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
       { description, status },
       { runValidators: true, new: true }
     );
-    res.status(200).json(updatedEntry!);
-    // Es igual que la constante anterior
-    // entryToUpdate.description = description;
-    // entryToUpdate.status = status;
-    // await entryToUpdate.save();
-  } catch (error: any) {
-    console.log({ error });
     await db.disconnect();
-    res.status(400).json({ message: error.errors.status.message.message });
+    res.status(200).json(updatedEntry!);
+  } catch (error: any) {
+    await db.disconnect();
+    res.status(400).json({ message: error.errors.status.message });
   }
+  // entryToUpdate.description = description;
+  // entryToUpdate.status = status;
+  // await entryToUpdate.save();
 };

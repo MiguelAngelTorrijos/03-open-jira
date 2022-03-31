@@ -3,6 +3,7 @@ import { EntriesContext } from './';
 import { entriesReducer } from './entriesReducer';
 import { Entry } from '../../interfaces/entry';
 import { entriesApi } from '../../apis';
+import { useSnackbar } from 'notistack';
 
 export interface EntriesState {
   entries: Entry[];
@@ -14,13 +15,17 @@ const Entries_INITIAL_STATE: EntriesState = {
 
 export const EntriesProvider: FC = ({ children }) => {
   const [state, dispatch] = useReducer(entriesReducer, Entries_INITIAL_STATE);
+  const { enqueueSnackbar } = useSnackbar();
 
   const addNewEntry = async (description: string) => {
     const { data } = await entriesApi.post<Entry>('/entries', { description });
     dispatch({ type: '[Entry] Add-Entry', payload: data });
   };
 
-  const updateEntry = async ({ _id, description, status }: Entry) => {
+  const updateEntry = async (
+    { _id, description, status }: Entry,
+    showSnackbar = false
+  ) => {
     try {
       const { data } = await entriesApi.put<Entry>(`/entries/${_id}`, {
         desciption: description,
@@ -31,6 +36,16 @@ export const EntriesProvider: FC = ({ children }) => {
         type: '[Entry] Entry-Updated',
         payload: data,
       });
+
+      if (showSnackbar)
+        enqueueSnackbar('Entrada actualizada', {
+          variant: 'success',
+          autoHideDuration: 1500,
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+          },
+        });
     } catch (error) {
       console.log({ error });
     }
